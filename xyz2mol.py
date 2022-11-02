@@ -482,7 +482,7 @@ def AC2BO(AC, atoms, charge, allow_charged_fragments=True, use_graph=True):
 
 
 def AC2mol(mol, AC, atoms, charge, allow_charged_fragments=True, 
-           use_graph=True, use_atom_maps=False):
+           use_graph=True, use_atom_maps=False, get_resonance=True):
     """
     """
 
@@ -508,11 +508,13 @@ def AC2mol(mol, AC, atoms, charge, allow_charged_fragments=True,
     if Chem.GetFormalCharge(mol) != charge:
         return []
 
-    # BO2mol returns an arbitrary resonance form. Let's make the rest
-    mols = rdchem.ResonanceMolSupplier(mol, Chem.UNCONSTRAINED_CATIONS, Chem.UNCONSTRAINED_ANIONS)
-    mols = [mol for mol in mols]
+    if get_resonance:
+        # BO2mol returns an arbitrary resonance form. Let's make the rest
+        mols = rdchem.ResonanceMolSupplier(mol, Chem.UNCONSTRAINED_CATIONS, Chem.UNCONSTRAINED_ANIONS)
+        mols = [mol for mol in mols]
+        return mols
 
-    return mols
+    return mol
 
 
 def get_proto_mol(atoms):
@@ -696,7 +698,7 @@ def chiral_stereo_check(mol):
 
 def xyz2mol(atoms, coordinates, charge=0, allow_charged_fragments=True,
             use_graph=True, use_huckel=False, embed_chiral=True,
-            use_atom_maps=False):
+            use_atom_maps=False, get_resonance=True):
     """
     Generate a rdkit molobj from atoms, coordinates and a total_charge.
 
@@ -725,7 +727,7 @@ def xyz2mol(atoms, coordinates, charge=0, allow_charged_fragments=True,
     new_mols = AC2mol(mol, AC, atoms, charge,
                      allow_charged_fragments=allow_charged_fragments,
                      use_graph=use_graph,
-                     use_atom_maps=use_atom_maps)
+                     use_atom_maps=use_atom_maps, get_resonance=get_resonance)
 
     # Check for stereocenters and chiral centers
     if embed_chiral:
